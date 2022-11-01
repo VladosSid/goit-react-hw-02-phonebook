@@ -5,6 +5,7 @@ import { Form, Label, InputContact } from './FormContacts.styled';
 class FormContacts extends Component {
   state = {
     name: '',
+    number: '',
   };
 
   recordContact = e => {
@@ -12,23 +13,36 @@ class FormContacts extends Component {
     this.setState({ [name]: value });
   };
 
-  handlSubmit = e => {
+  handlSubmit = () => {
+    this.props.onSubmit(this.state);
+    return this.reset();
+  };
+
+  checkMatches = e => {
     e.preventDefault();
+    const { name } = this.state;
+    const { listContacts } = this.props;
 
-    this.props.onSubmit(this.state.name);
+    const normalizedFilter = name.toLocaleLowerCase();
 
-    this.reset();
+    const checkName = listContacts.some(
+      contact => contact.name.toLocaleLowerCase() === normalizedFilter
+    );
+
+    checkName
+      ? alert('Rosie Simpson is already in contacts.')
+      : this.handlSubmit();
   };
 
   reset = () => {
-    this.setState({ name: '' });
+    this.setState({ name: '', number: '' });
   };
 
   render() {
     return (
-      <Form onSubmit={this.handlSubmit}>
+      <Form onSubmit={this.checkMatches}>
         <Label htmlFor="name">
-          Имя контакта
+          Name
           <InputContact
             type="text"
             name="name"
@@ -39,7 +53,20 @@ class FormContacts extends Component {
             onChange={this.recordContact}
           />
         </Label>
-        <button type="submit">Сохранить</button>
+
+        <Label htmlFor="number">
+          Number
+          <InputContact
+            type="tel"
+            name="number"
+            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+            required
+            value={this.state.number}
+            onChange={this.recordContact}
+          />
+        </Label>
+        <button type="submit">Add contact</button>
       </Form>
     );
   }
